@@ -59,10 +59,16 @@ def validate_ip_net(ctx, param, value):
 @click.option('--nat_rule',
               default='yes',
               help='Option specifying whether to add NATing iptables rule or not')
+
+@click.option('--pdn_network',
+              required=True,
+              help='PDN Address Network')
+
 def start(tun_ifname,
           ipv4_range,
           ipv6_range,
-          nat_rule):
+          nat_rule,
+          pdn_network):
 
     # Get the first IP address in the IP range and netmask prefix length
     first_ipv4_addr = next(ipv4_range.hosts(), None)
@@ -98,7 +104,13 @@ def start(tun_ifname,
         execute_bash_cmd('if ! ip6tables-save | grep -- \"-A INPUT -i ' + tun_ifname + ' -j ACCEPT\" ; then ' +
                          'ip6tables -A INPUT -i ' + tun_ifname + ' -j ACCEPT; fi')
 
-
+    tablename= tun_ifname + 'table'
+    ip_table_num= str(first_ipv4_addr).split('.')[2]
+    execute_bash_cmd('echo ' + ip_table_num + ' ' + tablename + ' >> /etc/iproute2/rt_tables')
+    execute_bash_cmd('ip rule add from ' + str(ipv4_range) + ' lookup ' + tablename )
+    execute_bash_cmd('ip route add default via ' + pdn_network + ' table ' + tablename )  
+    execute_bash_cmd('sysctl -w net.ipv4.ip_forward=1')   
+              
 def execute_bash_cmd(bash_cmd):
     # print("Executing: /bin/bash -c " + bash_cmd)
     return subprocess.run(bash_cmd, stdout=subprocess.PIPE, shell=True)

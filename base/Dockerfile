@@ -58,13 +58,15 @@ RUN apt-get update && \
         libnghttp2-dev \
         libtins-dev \
         libidn11-dev \
-        libtalloc-dev
-
+        libtalloc-dev \ 
+        libhiredis0.14
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && apt-get install -y nodejs
+RUN apt-get install libhiredis-dev
 
 # Get open5gs code and install
-RUN git clone --recursive https://github.com/open5gs/open5gs && cd open5gs && \
-    git checkout 7f088730ed4bedc12f562e53de44697d5e1f5c6e && meson build --prefix=`pwd`/install && \
+RUN echo 11
+RUN git clone --recursive https://github.com/AbdallahRustom/open5gs.git && cd open5gs && \  
+    git checkout smf_cdr_rustom  && meson build --prefix=`pwd`/install && \     
     ninja -C build && cd build && ninja install && \
     mkdir -p /open5gs/install/include
 
@@ -89,6 +91,7 @@ RUN apt-get update && \
         libtins-dev \
         libidn11-dev \
         libtalloc-dev \
+        libhiredis0.14 \ 
         netbase \
         ifupdown \
         net-tools \
@@ -97,6 +100,7 @@ RUN apt-get update && \
         python3-wheel \
         python3-pip \
         iptables \
+        tcpdump \
         iperf && \
     apt-get autoremove -y && apt-get autoclean
 
@@ -114,7 +118,23 @@ COPY --from=builder /open5gs/install/lib /open5gs/install/lib
 COPY --from=builder /open5gs/webui /open5gs/webui
 
 # Set the working directory to open5gs
-WORKDIR open5gs
+WORKDIR /open5gs
+
+# COPY ./smf /mnt/smf/
+# COPY ./smf/smf_init.sh /mnt/smf/smf_init.sh
+# COPY ./smf/ip_utils.py /mnt/smf/ip_utils.py
+# COPY ./smf/smf.yaml /mnt/smf/smf.yaml
+# COPY ./smf/smf.conf /mnt/smf/smf.conf
+# COPY ./smf/make_certs.sh /mnt/smf/make_certs.sh
+# COPY ./smf.log /open5gs/install/var/log/open5gs/smf.log
+# COPY ./cdr /open5gs/install/var/cdr/
+
+# COPY ./upf /mnt/upf/
+# COPY ./upf/upf_init.sh /mnt/upf/upf_init.sh
+# COPY ./upf/tun_if.py /mnt/upf/tun_if.py
+# COPY ./upf/ip_utils.py /mnt/upf/ip_utils.py
+# COPY ./upf/upf.yaml /mnt/upf/upf.yaml
+# COPY ./log/upf.log /open5gs/install/var/log/open5gs/upf.log
 
 COPY open5gs_init.sh /
 CMD /open5gs_init.sh

@@ -8,7 +8,12 @@ sgwc:
       - addr: SGWC_IP
     pfcp:
       - addr: SGWC_IP
-
+    cdr:
+      enabled: True
+      file_capture_period_sec: 1800
+      reporting_period_sec: 10
+      log_dir: /open5gs/install/var/cdr/sgwc
+      sgw_name: SGW-01
 sgwu:
     pfcp:
       - addr: SGWU_IP

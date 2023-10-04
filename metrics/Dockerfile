@@ -35,4 +35,11 @@ RUN apt-get update && \
     wget -q https://github.com/prometheus/prometheus/releases/download/v$PROMETHEUS_VERSION/prometheus-$PROMETHEUS_VERSION.linux-$(dpkg --print-architecture).tar.gz && \
     tar xvfz prometheus-$PROMETHEUS_VERSION.linux-$(dpkg --print-architecture).tar.gz
 
+RUN apt-get update && \
+    apt-get install -y tcpdump \
+    net-tools 
+
+COPY ./metrics_init.sh /mnt/metrics/metrics_init.sh
+COPY ./prometheus.yml /mnt/metrics/prometheus.yml
+
 CMD /mnt/metrics/metrics_init.sh

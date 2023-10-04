@@ -39,9 +39,18 @@ smf:
     p-cscf:
       - PCSCF_IP
     mtu: 1410
+    ctf:
+      enabled: no
     metrics:
       - addr: SMF_IP
         port: 9091
+ 
+    cdr:
+      enabled: True
+      file_capture_period_sec: 1800
+      reporting_period_sec: 10
+      log_dir: /open5gs/install/var/cdr/smf
+      sgw_name: SMF-01
 
 upf:
     pfcp:

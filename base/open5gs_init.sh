@@ -72,6 +72,8 @@ elif [[ "$COMPONENT_NAME" =~ ^(pcrf-[[:digit:]]+$) ]]; then
     cd install/bin && ./open5gs-pcrfd
 elif [[ "$COMPONENT_NAME" =~ ^(sgwc-[[:digit:]]+$) ]]; then
 	echo "Deploying component: '$COMPONENT_NAME'"
+	chmod +x /mnt/sgwc/sftp_server_init.sh
+	/mnt/sgwc/sftp_server_init.sh && \
 	/mnt/sgwc/sgwc_init.sh  && \
     cd install/bin && ./open5gs-sgwcd
 elif [[ "$COMPONENT_NAME" =~ ^(sgwu-[[:digit:]]+$) ]]; then

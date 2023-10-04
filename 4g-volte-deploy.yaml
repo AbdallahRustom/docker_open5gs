@@ -74,11 +74,15 @@ services:
     volumes:
       - ./sgwc:/mnt/sgwc
       - ./log:/open5gs/install/var/log/open5gs
+      - ./cdr:/open5gs/install/var/cdr/
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     expose:
       - "2123/udp"
       - "8805/udp"
+      - "22/tcp"
+    ports:
+      - "2524:22/tcp"
     networks:
       default:
         ipv4_address: ${SGWC_IP}
@@ -116,6 +120,7 @@ services:
     volumes:
       - ./smf:/mnt/smf
       - ./log:/open5gs/install/var/log/open5gs
+      - ./cdr:/open5gs/install/var/cdr/
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     expose:
@@ -129,6 +134,9 @@ services:
       - "2123/udp"
       - "7777/tcp"
       - "9091/tcp"
+    # ports:
+    #   - "3868:3868/udp"
+    #   - "3868:3868/tcp"
     networks:
       default:
         ipv4_address: ${SMF_IP}
@@ -158,6 +166,8 @@ services:
     networks:
       default:
         ipv4_address: ${UPF_IP}
+      net_pdn:
+        ipv4_address: 192.168.210.3
   mme:
     image: docker_open5gs
     depends_on:
@@ -294,7 +304,7 @@ services:
       - "3868/tcp"
       - "8080/tcp"
     ports:
-      - "8080:8080/tcp"
+      - "8081:8080/tcp"
     networks:
       default:
         ipv4_address: ${PYHSS_IP}
@@ -454,11 +464,102 @@ services:
     networks:
       default:
         ipv4_address: ${METRICS_IP}
+  pdn:
+    image: ubuntu
+    container_name: pdn
+    command: sleep 1000000
+    cap_add:
+      - NET_ADMIN
+    privileged: true
+    networks:
+      net_pdn:
+        ipv4_address: 192.168.210.2
+  # ocs:
+  #   image: sigscale/ocs
+  #   container_name: ocs
+  #   hostname: ocs.epc.mnc001.mcc001.3gppnetwork.org
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     - COMPONENT_NAME=ocs
+  #   entrypoint:
+  #     - /mnt/ocs/ocs_init.sh
+  #   privileged: true
+  #   volumes:
+  #     - ./ocs:/mnt/ocs
+  #     - ocsdb:/home/otp/db
+  #     - ./ocs/initialize:/home/otp/bin/initialize
+  #     - ./ocs/start:/home/otp/bin/start
+  #     - ./ocs/sys.config:/home/otp/releases/3.2.9/sys.config
+  #     - /etc/timezone:/etc/timezone:ro
+  #     - /etc/localtime:/etc/localtime:ro
+  #   expose:
+  #     - "3869/udp"
+  #     - "3869/tcp"
+  #     - "3869/sctp"
+  #     - "5868/udp"
+  #     - "5868/tcp"
+  #     - "5868/sctp"
+  #     - "4161/udp"
+  #     - "4161/tcp"
+  #     - "4161/sctp"
+  #     - "8080/tcp"
+  #   ports:
+  #     - "8080:8080/tcp"
+  #     - "3869:3868/tcp"
+  #   networks:
+  #     default:
+  #       ipv4_address: 172.22.0.220
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    env_file:
+      - .env
+    environment:
+      - COMPONENT_NAME=grafana
+    privileged: true
+    volumes:
+      - ./grafana:/mnt/grafana
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    expose:
+      - "3000/tcp"
+    ports:
+      - "3001:3000/tcp"
+    networks:
+      default:
+        ipv4_address: 172.22.0.40
+  # prom:
+  #   image: prom/prometheus
+  #   container_name: prom
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     - COMPONENT_NAME=prom
+  #   privileged: true
+  #   volumes:
+  #     # - ./prom:/mnt/prom
+  #     - ./prom/prometheus.yml:/etc/prometheus/prometheus.yml
+  #     - /etc/timezone:/etc/timezone:ro
+  #     - /etc/localtime:/etc/localtime:ro
+  #   expose:
+  #     - "9090/tcp"
+  #   ports:
+  #     - "9091:9090/tcp"
+  #   networks:
+  #     default:
+  #       ipv4_address: 172.22.0.50
 networks:
   default:
     ipam:
       config:
         - subnet: ${TEST_NETWORK}
+  net_pdn:
+    ipam:
+      config:
+        - subnet: 192.168.210.0/24
+
 volumes:
   mongodbdata: {}
   dbdata: {}
+  ocsdb: {}
