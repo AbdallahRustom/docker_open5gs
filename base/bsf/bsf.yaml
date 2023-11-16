@@ -1,5 +1,7 @@
+db_uri: mongodb://MONGO_IP/open5gs
+
 logger:
-    file: /open5gs/install/var/log/open5gs/ausf.log
+    file: /open5gs/install/var/log/open5gs/bsf.log
 
 sbi:
     server:
@@ -9,10 +11,10 @@ sbi:
 
 parameter:
 
-ausf:
+bsf:
     sbi:
-      - addr: AUSF_IP
-        port: 7777
+      - dev: eth0
+        advertise: bsf
 
 # scp:
 #     sbi:
@@ -24,4 +26,3 @@ nrf:
     sbi:
       - addr:
           - NRF_IP
-        port: 7777

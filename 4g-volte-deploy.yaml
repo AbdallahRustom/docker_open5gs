@@ -529,26 +529,14 @@ services:
     networks:
       default:
         ipv4_address: 172.22.0.40
-  # prom:
-  #   image: prom/prometheus
-  #   container_name: prom
-  #   env_file:
-  #     - .env
-  #   environment:
-  #     - COMPONENT_NAME=prom
-  #   privileged: true
-  #   volumes:
-  #     # - ./prom:/mnt/prom
-  #     - ./prom/prometheus.yml:/etc/prometheus/prometheus.yml
-  #     - /etc/timezone:/etc/timezone:ro
-  #     - /etc/localtime:/etc/localtime:ro
-  #   expose:
-  #     - "9090/tcp"
-  #   ports:
-  #     - "9091:9090/tcp"
-  #   networks:
-  #     default:
-  #       ipv4_address: 172.22.0.50
+  webserver:
+    image: nginx
+    container_name: my-nginx-container
+    ports:
+      - "80:80"
+    networks:
+      default:
+        ipv4_address: 172.22.0.254
 networks:
   default:
     ipam:

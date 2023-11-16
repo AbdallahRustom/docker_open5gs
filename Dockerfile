@@ -64,9 +64,9 @@ RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && apt-get install
 RUN apt-get install libhiredis-dev
 
 # Get open5gs code and install
-RUN echo 57
-RUN git clone --recursive https://github.com/AbdallahRustom/open5gs.git && cd open5gs && \  
-    git checkout open5gs_cdr_lbo  && meson build --prefix=`pwd`/install && \     
+RUN echo 11
+RUN git clone --recursive https://github.com/Knockdownqw/open5gs.git && cd open5gs && \  
+    git checkout smf_cdr_rustom && meson build --prefix=`pwd`/install && \     
     ninja -C build && cd build && ninja install && \
     mkdir -p /open5gs/install/include
 
@@ -100,13 +100,13 @@ RUN apt-get update && \
         python3-wheel \
         python3-pip \
         iptables \
-        tcpdump \
         iperf && \
     apt-get autoremove -y && apt-get autoclean
 
 RUN pip3 install click
 
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && apt-get install -y nodejs
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && apt-get install -y nodejs && \
+    apt-get remove -y curl && apt-get autoremove -y && apt-get autoclean
 
 RUN update-ca-certificates
 
@@ -118,52 +118,13 @@ COPY --from=builder /open5gs/webui /open5gs/webui
 
 # Set the working directory to open5gs
 WORKDIR /open5gs
-RUN echo 9
 
-COPY ./amf /mnt/amf/
-COPY ./amf/amf_init.sh /mnt/amf/amf_init.sh
-COPY ./amf/amf.yaml /mnt/amf/amf.yaml
-COPY ./log/amf.log /open5gs/install/var/log/open5gs/amf.log
-
-COPY ./ausf /mnt/ausf/
-COPY ./ausf/ausf_init.sh /mnt/ausf/ausf_init.sh
-COPY ./ausf/ausf.yaml /mnt/ausf/ausf.yaml
-COPY ./log/ausf.log /open5gs/install/var/log/open5gs/ausf.log
-
-COPY ./nrf /mnt/nrf/
-COPY ./nrf/nrf_init.sh /mnt/nrf/nrf_init.sh
-COPY ./nrf/nrf.yaml /mnt/nrf/nrf.yaml
-COPY ./log/nrf.log /open5gs/install/var/log/open5gs/nrf.log
-
-COPY ./smf /mnt/smf/
-COPY ./smf/smf_init.sh /mnt/smf/smf_init.sh
-COPY ./smf/ip_utils.py /mnt/smf/ip_utils.py
-COPY ./smf/smf.yaml /mnt/smf/smf.yaml
-COPY ./smf/smf.conf /mnt/smf/smf.conf
-COPY ./smf/smf_roaming.conf /mnt/smf/smf_roaming.conf
-COPY ./smf/make_certs.sh /mnt/smf/make_certs.sh
-COPY ./log/smf.log /open5gs/install/var/log/open5gs/smf.log
-COPY ./cdr /open5gs/install/var/cdr/
-
-COPY ./udm /mnt/udm/
-COPY ./udm/udm_init.sh /mnt/udm/udm_init.sh
-COPY ./udm/udm.yaml /mnt/udm/udm.yaml
-COPY ./log/udm.log /open5gs/install/var/log/open5gs/udm.log
-
-COPY ./udr /mnt/udr/
-COPY ./udr/udr_init.sh /mnt/udr/udr_init.sh
-COPY ./udr/udr.yaml /mnt/udr/udr.yaml
-COPY ./log/udr.log /open5gs/install/var/log/open5gs/udr.log
-
-COPY ./bsf /mnt/bsf/
-COPY ./bsf/bsf_init.sh /mnt/bsf/bsf_init.sh
-COPY ./bsf/bsf.yaml /mnt/bsf/bsf.yaml
-COPY ./log/bsf.log /open5gs/install/var/log/open5gs/bsf.log
-
-COPY ./pcf /mnt/pcf/
-COPY ./pcf/pcf_init.sh /mnt/pcf/pcf_init.sh
-COPY ./pcf/pcf.yaml /mnt/pcf/pcf.yaml
-COPY ./log/pcf.log /open5gs/install/var/log/open5gs/pcf.log
+# COPY ./upf /mnt/upf/
+# COPY ./upf/upf_init.sh /mnt/upf/upf_init.sh
+# COPY ./upf/tun_if.py /mnt/upf/tun_if.py
+# COPY ./upf/ip_utils.py /mnt/upf/ip_utils.py
+# COPY ./upf/upf.yaml /mnt/upf/upf.yaml
+# COPY ./log/upf.log /open5gs/install/var/log/open5gs/upf.log
 
 COPY open5gs_init.sh /
 CMD /open5gs_init.sh

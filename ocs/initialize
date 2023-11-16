@@ -1,0 +1,40 @@
+#!/bin/sh
+#
+# SigScale Global Inc.
+#
+# Initialize mnesia tables for OCS.
+#
+
+if test -z "$NODENAME"; then
+	export NODENAME=ocs
+fi
+
+if test -z "$ERL_LIBS"; then
+	export ERL_LIBS=lib
+fi
+
+if test -z "$ROOTDIR"; then
+	export ROOTDIR=/usr/local/lib/erlang
+fi
+
+if test -z "$RELDIR"; then
+	export RELDIR=$HOME/releases
+fi
+START_ERL_DATA=$RELDIR/start_erl.data
+
+if test -n "$ERLANG_COOKIE"; then
+	if ! test -e ~/.erlang.cookie; then
+		echo -n $ERLANG_COOKIE > ~/.erlang.cookie
+		chmod 400 ~/.erlang.cookie
+	fi
+fi
+
+OCS_VERSION=`sed 's/^.* //' $START_ERL_DATA`
+
+if test -n "$ERL_RPC"; then
+	RPC_ARGS="-kernel inet_dist_listen_min $ERL_RPC -kernel inet_dist_listen_max $ERL_RPC"
+fi
+
+erl -name $NODENAME -config $RELDIR/$OCS_VERSION/sys $RPC_ARGS \
+		-noinput -s ocs_app install -s init stop
+

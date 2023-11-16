@@ -11,8 +11,8 @@ parameter:
 
 ausf:
     sbi:
-      - addr: AUSF_IP
-        port: 7777
+      - dev: eth0
+        advertise: ausf
 
 # scp:
 #     sbi:
@@ -24,4 +24,3 @@ nrf:
     sbi:
       - addr:
           - NRF_IP
-        port: 7777
