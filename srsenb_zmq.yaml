@@ -22,7 +22,13 @@ services:
     networks:
       default:
         ipv4_address: ${SRS_ENB_IP}
+      net_access:
+        ipv4_address: 192.168.201.254
 networks:
   default:
     external:
       name: docker_open5gs_default
+  net_access:
+    external:
+      name: docker_open5gs_net_access
+

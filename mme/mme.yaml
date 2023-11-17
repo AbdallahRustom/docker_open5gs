@@ -6,6 +6,7 @@ parameter:
 mme:
     freeDiameter: /open5gs/install/etc/freeDiameter/mme.conf
     s1ap:
+      # dev: eth1
       dev: MME_IF
     gtpc:
       dev: MME_IF

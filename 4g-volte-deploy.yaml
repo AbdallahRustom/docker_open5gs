@@ -65,7 +65,7 @@ services:
     image: docker_open5gs
     depends_on:
       - smf
-      - upf
+      - upg
     container_name: sgwc
     env_file:
       - .env
@@ -90,7 +90,7 @@ services:
     image: docker_open5gs
     depends_on:
       - smf
-      - upf
+      - upg
     container_name: sgwu
     env_file:
       - .env
@@ -109,6 +109,8 @@ services:
     networks:
       default:
         ipv4_address: ${SGWU_IP}
+      net_access:
+        ipv4_address: 192.168.201.10
   smf:
     image: docker_open5gs
     container_name: smf
@@ -140,34 +142,34 @@ services:
     networks:
       default:
         ipv4_address: ${SMF_IP}
-  upf:
-    image: docker_open5gs
-    depends_on:
-      - smf
-    container_name: upf
-    env_file:
-      - .env
-    environment:
-      - COMPONENT_NAME=upf-1
-    volumes:
-      - ./upf:/mnt/upf
-      - ./log:/open5gs/install/var/log/open5gs
-      - /etc/timezone:/etc/timezone:ro
-      - /etc/localtime:/etc/localtime:ro
-    expose:
-      - "2152/udp"
-      - "8805/udp"
-      - "9091/tcp"
-    cap_add:
-      - NET_ADMIN
-    privileged: true
-    sysctls:
-      - net.ipv4.ip_forward=1
-    networks:
-      default:
-        ipv4_address: ${UPF_IP}
-      net_pdn:
-        ipv4_address: 192.168.210.3
+  # upf:
+  #   image: docker_open5gs
+  #   depends_on:
+  #     - smf
+  #   container_name: upf
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     - COMPONENT_NAME=upf-1
+  #   volumes:
+  #     - ./upf:/mnt/upf
+  #     - ./log:/open5gs/install/var/log/open5gs
+  #     - /etc/timezone:/etc/timezone:ro
+  #     - /etc/localtime:/etc/localtime:ro
+  #   expose:
+  #     - "2152/udp"
+  #     - "8805/udp"
+  #     - "9091/tcp"
+  #   cap_add:
+  #     - NET_ADMIN
+  #   privileged: true
+  #   sysctls:
+  #     - net.ipv4.ip_forward=1
+  #   networks:
+  #     default:
+  #       ipv4_address: ${UPF_IP}
+  #     net_pdn:
+  #       ipv4_address: 192.168.210.3
   mme:
     image: docker_open5gs
     depends_on:
@@ -175,7 +177,7 @@ services:
       - sgwc
       - sgwu
       - smf
-      - upf
+      - upg
       - osmomsc
     container_name: mme
     env_file:
@@ -201,7 +203,10 @@ services:
     #   - "36412:36412/sctp"
     networks:
       default:
+        # ipv4_address: 172.22.0.9
         ipv4_address: ${MME_IP}
+      # net_access:
+      #   ipv4_address: 192.168.201.253
   pcrf:
     image: docker_open5gs
     container_name: pcrf
@@ -241,175 +246,175 @@ services:
     networks:
       default:
         ipv4_address: ${DNS_IP}
-  rtpengine:
-    build: ./rtpengine
-    image: docker_rtpengine
-    container_name: rtpengine
-    privileged: true
-    env_file:
-      - .env
-    volumes:
-      - ./rtpengine:/mnt/rtpengine
-      - /etc/timezone:/etc/timezone:ro
-      - /etc/localtime:/etc/localtime:ro
-    cap_add:
-      - NET_ADMIN
-    environment:
-      - TABLE=0
-      - INTERFACE=${RTPENGINE_IP}
-      - LISTEN_NG=${RTPENGINE_IP}:2223
-      - PIDFILE=/run/ngcp-rtpengine-daemon.pid
-      - PORT_MAX=50000
-      - PORT_MIN=49000
-      - NO_FALLBACK=no
-      - TOS=184
-    expose:
-      - "2223/udp"
-      - "49000-50000/udp"
-    networks:
-      default:
-        ipv4_address: ${RTPENGINE_IP}
-  mysql:
-    build: ./mysql
-    image: docker_mysql
-    container_name: mysql
-    env_file:
-      - .env
-    volumes:
-      - dbdata:/var/lib/mysql
-      - /etc/timezone:/etc/timezone:ro
-      - /etc/localtime:/etc/localtime:ro
-    expose:
-      - "3306/tcp"
-    networks:
-      default:
-        ipv4_address: ${MYSQL_IP}
-  pyhss:
-    build: ./pyhss
-    image: docker_pyhss
-    container_name: pyhss
-    dns: ${DNS_IP}
-    volumes:
-      - ./pyhss:/mnt/pyhss
-      - ./pyhss/logs:/pyhss/log/
-      - /etc/timezone:/etc/timezone:ro
-      - /etc/localtime:/etc/localtime:ro
-    env_file:
-      - .env
-    depends_on:
-      - dns
-      - mysql
-    expose:
-      - "3868/udp"
-      - "3868/tcp"
-      - "8080/tcp"
-    ports:
-      - "8081:8080/tcp"
-    networks:
-      default:
-        ipv4_address: ${PYHSS_IP}
-  icscf:
-    image: docker_kamailio
-    container_name: icscf
-    dns: ${DNS_IP}
-    volumes:
-      - ./icscf:/mnt/icscf
-      - /etc/timezone:/etc/timezone:ro
-      - /etc/localtime:/etc/localtime:ro
-    env_file:
-      - .env
-    environment:
-      - COMPONENT_NAME=icscf-1
-    depends_on:
-      - dns
-      - mysql
-      - pyhss
-    expose:
-      - "3869/udp"
-      - "3869/tcp"
-      - "4060/udp"
-      - "4060/tcp"
-    networks:
-      default:
-        ipv4_address: ${ICSCF_IP}
-  scscf:
-    image: docker_kamailio
-    container_name: scscf
-    dns: ${DNS_IP}
-    volumes:
-      - ./scscf:/mnt/scscf
-      - /etc/timezone:/etc/timezone:ro
-      - /etc/localtime:/etc/localtime:ro
-    env_file:
-      - .env
-    environment:
-      - COMPONENT_NAME=scscf-1
-    depends_on:
-      - dns
-      - mysql
-      - pyhss
-    expose:
-      - "3870/udp"
-      - "3870/tcp"
-      - "6060/udp"
-      - "6060/tcp"
-    networks:
-      default:
-        ipv4_address: ${SCSCF_IP}
-  pcscf:
-    image: docker_kamailio
-    container_name: pcscf
-    dns: ${DNS_IP}
-    privileged: true
-    cap_add:
-      - NET_ADMIN
-    volumes:
-      - ./pcscf:/mnt/pcscf
-      - /etc/timezone:/etc/timezone:ro
-      - /etc/localtime:/etc/localtime:ro
-    env_file:
-      - .env
-    environment:
-      - COMPONENT_NAME=pcscf-1
-    depends_on:
-      - dns
-      - mysql
-      - rtpengine
-      - icscf
-      - scscf
-    expose:
-      - "3871/udp"
-      - "3871/tcp"
-      - "5060/tcp"
-      - "5060/udp"
-      - "5100-5120/tcp"
-      - "5100-5120/udp"
-      - "6100-6120/tcp"
-      - "6100-6120/udp"
-    networks:
-      default:
-        ipv4_address: ${PCSCF_IP}
-  smsc:
-    image: docker_kamailio
-    container_name: smsc
-    dns: ${DNS_IP}
-    volumes:
-      - ./smsc:/mnt/smsc
-      - /etc/timezone:/etc/timezone:ro
-      - /etc/localtime:/etc/localtime:ro
-    env_file:
-      - .env
-    environment:
-      - COMPONENT_NAME=smsc-1
-    depends_on:
-      - dns
-      - mysql
-    expose:
-      - "7090/udp"
-      - "7090/tcp"
-    networks:
-      default:
-        ipv4_address: ${SMSC_IP}
+  # rtpengine:
+  #   build: ./rtpengine
+  #   image: docker_rtpengine
+  #   container_name: rtpengine
+  #   privileged: true
+  #   env_file:
+  #     - .env
+  #   volumes:
+  #     - ./rtpengine:/mnt/rtpengine
+  #     - /etc/timezone:/etc/timezone:ro
+  #     - /etc/localtime:/etc/localtime:ro
+  #   cap_add:
+  #     - NET_ADMIN
+  #   environment:
+  #     - TABLE=0
+  #     - INTERFACE=${RTPENGINE_IP}
+  #     - LISTEN_NG=${RTPENGINE_IP}:2223
+  #     - PIDFILE=/run/ngcp-rtpengine-daemon.pid
+  #     - PORT_MAX=50000
+  #     - PORT_MIN=49000
+  #     - NO_FALLBACK=no
+  #     - TOS=184
+  #   expose:
+  #     - "2223/udp"
+  #     - "49000-50000/udp"
+  #   networks:
+  #     default:
+  #       ipv4_address: ${RTPENGINE_IP}
+  # mysql:
+  #   build: ./mysql
+  #   image: docker_mysql
+  #   container_name: mysql
+  #   env_file:
+  #     - .env
+  #   volumes:
+  #     - dbdata:/var/lib/mysql
+  #     - /etc/timezone:/etc/timezone:ro
+  #     - /etc/localtime:/etc/localtime:ro
+  #   expose:
+  #     - "3306/tcp"
+  #   networks:
+  #     default:
+  #       ipv4_address: ${MYSQL_IP}
+  # pyhss:
+  #   build: ./pyhss
+  #   image: docker_pyhss
+  #   container_name: pyhss
+  #   dns: ${DNS_IP}
+  #   volumes:
+  #     - ./pyhss:/mnt/pyhss
+  #     - ./pyhss/logs:/pyhss/log/
+  #     - /etc/timezone:/etc/timezone:ro
+  #     - /etc/localtime:/etc/localtime:ro
+  #   env_file:
+  #     - .env
+  #   depends_on:
+  #     - dns
+  #     - mysql
+  #   expose:
+  #     - "3868/udp"
+  #     - "3868/tcp"
+  #     - "8080/tcp"
+  #   ports:
+  #     - "8081:8080/tcp"
+  #   networks:
+  #     default:
+  #       ipv4_address: ${PYHSS_IP}
+  # icscf:
+  #   image: docker_kamailio
+  #   container_name: icscf
+  #   dns: ${DNS_IP}
+  #   volumes:
+  #     - ./icscf:/mnt/icscf
+  #     - /etc/timezone:/etc/timezone:ro
+  #     - /etc/localtime:/etc/localtime:ro
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     - COMPONENT_NAME=icscf-1
+  #   depends_on:
+  #     - dns
+  #     - mysql
+  #     - pyhss
+  #   expose:
+  #     - "3869/udp"
+  #     - "3869/tcp"
+  #     - "4060/udp"
+  #     - "4060/tcp"
+  #   networks:
+  #     default:
+  #       ipv4_address: ${ICSCF_IP}
+  # scscf:
+  #   image: docker_kamailio
+  #   container_name: scscf
+  #   dns: ${DNS_IP}
+  #   volumes:
+  #     - ./scscf:/mnt/scscf
+  #     - /etc/timezone:/etc/timezone:ro
+  #     - /etc/localtime:/etc/localtime:ro
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     - COMPONENT_NAME=scscf-1
+  #   depends_on:
+  #     - dns
+  #     - mysql
+  #     - pyhss
+  #   expose:
+  #     - "3870/udp"
+  #     - "3870/tcp"
+  #     - "6060/udp"
+  #     - "6060/tcp"
+  #   networks:
+  #     default:
+  #       ipv4_address: ${SCSCF_IP}
+  # pcscf:
+  #   image: docker_kamailio
+  #   container_name: pcscf
+  #   dns: ${DNS_IP}
+  #   privileged: true
+  #   cap_add:
+  #     - NET_ADMIN
+  #   volumes:
+  #     - ./pcscf:/mnt/pcscf
+  #     - /etc/timezone:/etc/timezone:ro
+  #     - /etc/localtime:/etc/localtime:ro
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     - COMPONENT_NAME=pcscf-1
+  #   depends_on:
+  #     - dns
+  #     - mysql
+  #     - rtpengine
+  #     - icscf
+  #     - scscf
+  #   expose:
+  #     - "3871/udp"
+  #     - "3871/tcp"
+  #     - "5060/tcp"
+  #     - "5060/udp"
+  #     - "5100-5120/tcp"
+  #     - "5100-5120/udp"
+  #     - "6100-6120/tcp"
+  #     - "6100-6120/udp"
+  #   networks:
+  #     default:
+  #       ipv4_address: ${PCSCF_IP}
+  # smsc:
+  #   image: docker_kamailio
+  #   container_name: smsc
+  #   dns: ${DNS_IP}
+  #   volumes:
+  #     - ./smsc:/mnt/smsc
+  #     - /etc/timezone:/etc/timezone:ro
+  #     - /etc/localtime:/etc/localtime:ro
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     - COMPONENT_NAME=smsc-1
+  #   depends_on:
+  #     - dns
+  #     - mysql
+  #   expose:
+  #     - "7090/udp"
+  #     - "7090/tcp"
+  #   networks:
+  #     default:
+  #       ipv4_address: ${SMSC_IP}
   osmomsc:
     build: ./osmomsc
     image: docker_osmomsc
@@ -472,8 +477,8 @@ services:
       - NET_ADMIN
     privileged: true
     networks:
-      net_pdn:
-        ipv4_address: 192.168.210.2
+      net_internet:
+        ipv4_address: 192.168.212.10
   # ocs:
   #   image: sigscale/ocs
   #   container_name: ocs
@@ -529,24 +534,86 @@ services:
     networks:
       default:
         ipv4_address: 172.22.0.40
-  webserver:
-    image: nginx
-    container_name: my-nginx-container
-    ports:
-      - "80:80"
+  # webserver:
+  #   image: nginx
+  #   container_name: my-nginx-container
+  #   ports:
+  #     - "80:80"
+  #   networks:
+  #     default:
+  #       ipv4_address: 172.22.0.254
+  
+  upg:
+    # image: oaisoftwarealliance/oai-upf-vpp:v1.4.0
+    image: upg:debug
+    entrypoint: /entrypoint.sh
+    command: bash
+    privileged: true
+    container_name: "vpp-upf2"
+    depends_on:
+      - smf
+    environment:
+      - NSSAI_SD_0=222
+      - SST=123
+      # - NWI_N3=access.oai.org
+      # - NWI_N6=core.oai.org
+      - NWI_N3=internet
+      - NWI_N6=sgi
+      - GW_ID=1
+      #- NETWORK_UE_IP=12.1.1.0/24
+      - N3_IPV4_ADDRESS_LOCAL=192.168.201.5
+      - N4_IPV4_ADDRESS_LOCAL=${UPG_IP}
+      - N6_IPV4_ADDRESS_LOCAL=192.168.212.5
+      - N3_IPV4_ADDRESS_REMOTE=192.168.201.21
+      - N4_IPV4_ADDRESS_REMOTE=${SMF_IP}
+      - N6_IPV4_ADDRESS_REMOTE=192.168.212.10
+      - INTERFACE_ACCESS=eth1
+      - INTERFACE_CORE=eth2
+      - INTERFACE_CP=eth0
+      - NETWORK_UE_IP=192.168.100.0/24
+      - SGI_IPV4=192.168.212.5
+      - NAME=VPP-UPF-2
+      - MNC=01
+      - MNC03=01
+      - MCC=002
+      - REALM=3gppnetwork.org
+      - VPP_MAIN_CORE=0
+      - VPP_CORE_WORKER=1
+      - VPP_PLUGIN_PATH=/usr/lib/x86_64-linux-gnu/vpp_plugins/
+      - DNN=internet
+      - HTTP_VERSION=1
+    cap_add:
+      - NET_ADMIN
+    sysctls:
+      - net.ipv4.ip_forward=1
+      #- net.ipv6.conf.all.disable_ipv6=0
+    volumes:
+      - ./upg:/mnt/upg
+      - ./upg/entrypoint.sh:/entrypoint.sh
+      - ./log:/var/log/syslog
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
     networks:
       default:
-        ipv4_address: 172.22.0.254
+        ipv4_address: 172.22.0.189
+        # ipv4_address: ${UPG_IP}
+      net_internet:
+        ipv4_address: 192.168.212.5
+      net_access:
+        ipv4_address: 192.168.201.5
 networks:
   default:
     ipam:
       config:
         - subnet: ${TEST_NETWORK}
-  net_pdn:
+  net_access:
     ipam:
       config:
-        - subnet: 192.168.210.0/24
-
+        - subnet: 192.168.201.1/24 
+  net_internet:
+    ipam:
+      config:
+        - subnet: 192.168.212.1/24
 volumes:
   mongodbdata: {}
   dbdata: {}
