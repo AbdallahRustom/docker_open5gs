@@ -66,7 +66,7 @@ RUN apt-get install libhiredis-dev
 # Get open5gs code and install
 RUN echo 57
 RUN git clone --recursive https://github.com/AbdallahRustom/open5gs.git && cd open5gs && \  
-    git checkout open5gs_cdr_lbo  && meson build --prefix=`pwd`/install && \     
+    git checkout vpp-upg   && meson build --prefix=`pwd`/install && \     
     ninja -C build && cd build && ninja install && \
     mkdir -p /open5gs/install/include
 
