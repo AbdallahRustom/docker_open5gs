@@ -1,0 +1,7 @@
+# SWG CDR File:
+# File Start Time: 18:25:44 (1700506544)
+# File End Time: 18:55:44 (1700504744)
+# SGW Name: SMF-01
+# epoch,imsi,event,charging_id,msisdn,ue_imei,timezone_raw,plmn,tac,eci,sgw_ip,ue_ip,pgw_ip,apn,qci,octets_in,octets_out
+1700504744,001021234567895,session_start,<charging_id placeholder>,,3534900698733153,0000,61728,1,105217,172.22.0.5,192.168.100.2,172.22.0.7,internet,8,0,0
+1700504753,001021234567895,session_update,<charging_id placeholder>,,3534900698733153,0000,61728,1,105217,172.22.0.5,192.168.100.2,172.22.0.7,internet,8,0,0

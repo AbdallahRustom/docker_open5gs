@@ -12,5 +12,4 @@ ip link set $INTERFACE_CORE down
 ip link set $INTERFACE_CORE name n6
 ip link set n6 up
 
-#ip route add $NETWORK_UE_IP via $SGI_IPV4 dev n6
-vpp -c /mnt/upg/startup.conf
+./bin/vpp -c /mnt/upg/startup.conf
